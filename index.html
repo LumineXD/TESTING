@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AGENT48 | Live Stream</title>
+    <link rel="icon" type="image/png" href="logo.jpg">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    
+</head>
+
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div id="login-wrapper" class="login-wrapper">
+        <div class="glass-card login-card">
+            <div class="login-header">
+                <img src="https://connect.idn.media/assets/images/logo_idn_connect.svg" alt="IDN Connect" class="logo-brand">
+                <h1>AGENT<span class="text-gradient">48</span></h1>
+                <p>Exclusive Live Access</p>
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="credential-input" placeholder=" " autocomplete="off">
+                <label for="credential-input">Email</label>
+            </div>
+            
+            <a href="https://wa.me/6285135421716?text=Silahkan%20Hubungi%20admin" target="_blank" class="forgot-link">Bantuan Akses?</a>
+
+            <div class="action-buttons">
+                <button id="submit-credential" class="btn-primary glow-effect">
+                    <span>MASUK SEKARANG</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button id="reset-fingerprint-button" class="btn-secondary">
+                    <i class="fas fa-sync-alt"></i> Reset Perangkat
+                </button>
+            </div>
+            
+            <p id="credential-error-message" class="error-message"></p>
+
+            <div class="login-footer">
+                &copy; 2025 AGENT48 Systems.
+            </div>
+        </div>
+    </div>
+
+    <div id="subscription-modal" class="modal-overlay hidden">
+        <div class="modal-glass">
+            <div class="modal-icon success"><i class="fas fa-shield-alt"></i></div>
+            <h2>Akses Diterima</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <small>Terdaftar</small>
+                    <span id="reg-date">--</span>
+                </div>
+                <div class="info-item">
+                    <small>Berakhir</small>
+                    <span id="exp-date">--</span>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <p>Sisa Durasi: <span id="days-left" class="neon-text">--</span> Hari</p>
+            </div>
+            <button id="close-modal-button" class="btn-primary full-width">Luncurkan Stream</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
+        
+        <nav class="glass-nav">
+            <div class="nav-left">
+                <img src="AGENT48.png" alt="AGENT48" class="nav-logo">
+            </div>
+            <div class="nav-right">
+                <div class="coin-pill">
+                    <i class="fas fa-coins coin-spin"></i>
+                    <span>846</span>
+                    <i class="fas fa-plus-circle add-coin"></i>
+                </div>
+                <div class="profile-wrap">
+                    <img src="https://manekingidol.my.id/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fdefault.3bc21d87.png&w=384&q=75" alt="User">
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="video-section">
+                <div id="player-wrapper" class="player-wrapper neon-border">
+                    <video id="player" playsinline controls></video>
+                    
+                    
+                    
+                    <div id="initial-overlay" class="offline-overlay">
+                        <div class="offline-content">
+                            <div class="pulse-ring"></div>
+                            <h2 class="glitch-text">LOADING</h2>
+                            <p>Menghubungkan ke server...</p>
+                        </div>
+                    </div>
+
+                    <div id="countdown-overlay" class="offline-overlay hidden">
+                        <div class="offline-content">
+                            <div class="pulse-ring"></div>
+                            <h2 class="glitch-text" data-text="OFFLINE">OFFLINE</h2>
+                            <p>Silahkan Menunggu.</p>
+                            
+                            <div id="countdown-timer" class="countdown-grid">
+                                <div class="time-unit"><span id="cd-days">0</span><small>HARI</small></div>
+                                <div class="time-unit"><span id="cd-hours">0</span><small>JAM</small></div>
+                                <div class="time-unit"><span id="cd-minutes">0</span><small>MENIT</small></div>
+                                <div class="time-unit"><span id="cd-seconds">0</span><small>DETIK</small></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stream-meta glass-panel stream-info-bottom">
+                    <div class="meta-left artist-details">
+                        <div class="avatar-ring">
+                            <img src="logo.jpg" class="member-img" alt="Logo">
+                        </div>
+                        <div class="text-info artist-text">
+                            <h3 id="show-title-bottom">Memuat Judul...</h3>
+                            <p id="artist-name-bottom">Memuat Deskripsi...</p>
+                        </div>
+                    </div>
+                    <div class="meta-stats stream-actions">
+                         <div id="quality-selector-bottom"></div>
+                        <div class="stat-box">
+                            <i class="fas fa-users"></i>
+                            <span id="followers-count">48K</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="sidebar-section sidebar">
+                <div class="glass-panel sidebar-panel">
+                    
+                    <div class="sidebar-tabs">
+                        <button class="tab-btn active" data-target="chat-tab">
+                            <i class="fas fa-comments"></i> LIVE CHAT
+                        </button>
+                        <button class="tab-btn" data-target="lineup-tab">
+                            <i class="fas fa-users"></i> LINEUP
+                        </button>
+                    </div>
+            
+                    <div id="chat-tab" class="tab-content active">
+                        <iframe 
+                            id="youtube-chat-frame"
+                            src="" 
+                            class="chat-iframe" 
+                            title="YouTube Live Chat"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+
+                    <div id="lineup-tab" class="tab-content">
+                        <div class="lineup-header-info">
+                            <span>Member on Stage</span> 
+                            <span class="live-badge">LIVE</span>
+                        </div>
+                        <div id="lineup-container" class="lineup-grid">
+                            </div>
+                    </div>
+            
+                </div>
+            </aside>
+        </main>
+
+        <footer class="app-footer">
+            <p>&copy; 2025 AGENT48 PROJECT. Designed for Fans.</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script type="module" src="assets/js/player.js"></script>
+    <script src="assets\js\style.js"></script>
+</body>
+</html>
