@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>STREAM48 Login</title>
+    <title>STREAM48</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -896,7 +896,57 @@
             25% { transform: translateX(-4px); }
             75% { transform: translateX(4px); }
         }
+
+        /* Animasi modal masuk */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Animasi modal keluar */
+        @keyframes modalFadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+
+        /* Kelas untuk animasi masuk */
+        .modal.show {
+            display: block;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        /* Kelas untuk animasi keluar */
+        .modal.hide {
+            animation: modalFadeOut 0.3s ease-in;
+        }
+
+        /* Staggered animation untuk event card */
+        .event-card {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -942,11 +992,11 @@
 
         <div class="payment-info">
             <div class="payment-amount" id="methodAmount">Rp 12.000</div>
-            <div class="payment-note"><span id="methodEvent">Cara Meminum Ramune</span></div> <!-- Diubah: Hapus "Untuk: " -->
+            <div class="payment-note"><span id="methodEvent">Cara Meminum Ramune</span></div>
         </div>
 
         <div class="payment-methods">
-            <div class="payment-option disabled" onclick="showComingSoon()"> <!-- Fungsi ini akan diubah -->
+            <div class="payment-option disabled" onclick="showComingSoon()">
                 <div class="payment-icon">
                     <i class="fas fa-qrcode"></i>
                 </div>
@@ -955,7 +1005,7 @@
                     <span class="coming-soon">COMING SOON</span>
                 </div>
             </div>
-            <div class="payment-option" onclick="selectManualPayment()"> <!-- Fungsi ini tetap -->
+            <div class="payment-option" onclick="selectManualPayment()">
                 <div class="payment-icon">
                     <i class="fab fa-whatsapp"></i>
                 </div>
@@ -966,8 +1016,7 @@
             </div>
         </div>
 
-        <!-- Tombol Kembali menggunakan kelas baru -->
-        <button class="btn-back-secondary" onclick="goBackToLogin()"> <!-- Ganti kelas -->
+        <button class="btn-back-secondary" onclick="goBackToLogin()">
             <i class="fas fa-arrow-left"></i> KEMBALI
         </button>
 
@@ -986,7 +1035,7 @@
 
         <div class="payment-info">
             <div class="payment-amount" id="manualAmount">Rp 12.000</div>
-            <div class="payment-note">Order ID: <span id="manualOrderId">-</span></div> <!-- Ini untuk Order ID -->
+            <div class="payment-note">Order ID: <span id="manualOrderId">-</span></div>
         </div>
 
         <div class="order-details">
@@ -1009,13 +1058,11 @@
             </div>
         </div>
 
-        <!-- Tombol WhatsApp dengan font disesuaikan -->
         <button class="whatsapp-btn" id="whatsappOrder">
             <i class="fab fa-whatsapp"></i> KONFIRMASI VIA WHATSAPP
         </button>
 
-        <!-- Tombol Kembali menggunakan kelas baru -->
-        <button class="btn-back-secondary" onclick="goBackToPaymentMethod()"> <!-- Ganti kelas -->
+        <button class="btn-back-secondary" onclick="goBackToPaymentMethod()">
             <i class="fas fa-arrow-left"></i> PILIH METODE LAIN
         </button>
 
@@ -1034,7 +1081,7 @@
 
         <div class="payment-info">
             <div class="payment-amount" style="color: var(--accent-success);">Pembayaran Berhasil!</div>
-            <div class="payment-note"><span id="createUserEvent">Cara Meminum Ramune</span></div> <!-- Diubah: Hapus "Untuk: " -->
+            <div class="payment-note"><span id="createUserEvent">Cara Meminum Ramune</span></div>
         </div>
 
         <div class="form-group" id="newUsernameGroup">
@@ -1065,7 +1112,7 @@
                     <!-- Tiket akan di-generate secara dinamis di sini -->
                 </div>
                 <div class="back-home-container">
-                    <button class="btn-back-home" id="backToHome"> <!-- Ini tetap seperti aslinya -->
+                    <button class="btn-back-home" id="backToHome">
                         <i class="fas fa-home"></i> Back To Home
                     </button>
                 </div>
@@ -1074,7 +1121,6 @@
     </div>
 
     <script>
-        
         const TICKETS_DATA = [
             {
                 id: 1,
@@ -1119,16 +1165,16 @@
             const eventsGrid = document.getElementById('eventsGrid');
             eventsGrid.innerHTML = ''; 
             
-            TICKETS_DATA.forEach(ticket => {
+            TICKETS_DATA.forEach((ticket, index) => {
                 const eventCard = document.createElement('div');
                 eventCard.className = 'event-card';
-                
+                eventCard.style.animationDelay = `${index * 0.1}s`;
+
                 const eventImage = document.createElement('div');
                 eventImage.className = 'event-image';
                 eventImage.id = `eventImage${ticket.id}`;
                 
                 if (ticket.image && ticket.image.trim() !== '') {
-                    
                     eventImage.style.backgroundImage = `url('${ticket.image}')`;
                     eventImage.style.backgroundSize = 'cover';
                     eventImage.style.backgroundPosition = 'center';
@@ -1194,35 +1240,23 @@
             showContainer('paymentMethodContainer');
             
             const scheduleModal = document.getElementById('scheduleModal');
-            scheduleModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
+            scheduleModal.classList.remove('show');
+            scheduleModal.classList.add('hide');
+            setTimeout(() => {
+                scheduleModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 300);
         }
 
-        function addTicket(ticketData) {
-            const newId = TICKETS_DATA.length > 0 ? Math.max(...TICKETS_DATA.map(t => t.id)) + 1 : 1;
-            
-            TICKETS_DATA.push({
-                id: newId,
-                ...ticketData
-            });
-            
-            renderTickets();
+        function formatCurrency(amount) {
+            return 'Rp ' + amount.toLocaleString('id-ID');
         }
 
-        function removeTicket(ticketId) {
-            const index = TICKETS_DATA.findIndex(ticket => ticket.id === ticketId);
-            if (index !== -1) {
-                TICKETS_DATA.splice(index, 1);
-                renderTickets();
-            }
-        }
-
-        function updateTicket(ticketId, updatedData) {
-            const index = TICKETS_DATA.findIndex(ticket => ticket.id === ticketId);
-            if (index !== -1) {
-                TICKETS_DATA[index] = { ...TICKETS_DATA[index], ...updatedData };
-                renderTickets();
-            }
+        function setupInputAnimation(input, group) {
+            input.addEventListener('focus', () => group.classList.add('focused'));
+            input.addEventListener('blur', () => !input.value && group.classList.remove('focused'));
+            input.addEventListener('input', () => input.value ? group.classList.add('has-value') : group.classList.remove('has-value'));
+            if (input.value) group.classList.add('has-value');
         }
 
         function showContainer(containerId) {
@@ -1242,21 +1276,11 @@
             return 'ST48-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
         }
 
-        function formatCurrency(amount) {
-            return 'Rp ' + amount.toLocaleString('id-ID');
-        }
-
-        function setupInputAnimation(input, group) {
-            input.addEventListener('focus', () => group.classList.add('focused'));
-            input.addEventListener('blur', () => !input.value && group.classList.remove('focused'));
-            input.addEventListener('input', () => input.value ? group.classList.add('has-value') : group.classList.remove('has-value'));
-            if (input.value) group.classList.add('has-value');
-        }
-
-        window.showComingSoon = function() {
+        window.showComingSoon = function () {
+            alert("Fitur ini akan segera hadir!");
         };
 
-        window.selectManualPayment = function() {
+        window.selectManualPayment = function () {
             currentOrderId = generateOrderId(); 
             
             const manualAmount = document.getElementById('manualAmount');
@@ -1350,30 +1374,42 @@
 
             showScheduleBtn.addEventListener('click', () => {
                 scheduleModal.style.display = 'block';
+                scheduleModal.classList.remove('hide');
+                scheduleModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
                 renderTickets();
             });
 
             closeModal.addEventListener('click', () => {
-                scheduleModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
+                scheduleModal.classList.remove('show');
+                scheduleModal.classList.add('hide');
+                setTimeout(() => {
+                    scheduleModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
             });
 
             backToHomeBtn.addEventListener('click', () => {
-                scheduleModal.style.display = 'none';
-                document.body.style.overflow = 'auto';
+                scheduleModal.classList.remove('show');
+                scheduleModal.classList.add('hide');
+                setTimeout(() => {
+                    scheduleModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
             });
 
             scheduleModal.addEventListener('click', (e) => {
                 if (e.target === scheduleModal) {
-                    scheduleModal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
+                    scheduleModal.classList.remove('show');
+                    scheduleModal.classList.add('hide');
+                    setTimeout(() => {
+                        scheduleModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }, 300);
                 }
             });
 
             setTimeout(() => usernameInput.focus(), 800);
-
-            renderTickets();
 
             const particlesContainer = document.getElementById('particles');
             for (let i = 0; i < 12; i++) {
@@ -1393,7 +1429,6 @@
                 particlesContainer.appendChild(particle);
             }
         });
-
     </script>
 
 </body>
