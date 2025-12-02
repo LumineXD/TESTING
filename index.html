@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>STREAM48</title>
+    <title>Stream48 | Live Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tambahkan Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root {
             --bg-gradient-start: #0f172a;
@@ -897,7 +901,6 @@
             75% { transform: translateX(4px); }
         }
 
-        /* Animasi modal masuk */
         @keyframes modalFadeIn {
             from {
                 opacity: 0;
@@ -909,7 +912,6 @@
             }
         }
 
-        /* Animasi modal keluar */
         @keyframes modalFadeOut {
             from {
                 opacity: 1;
@@ -921,18 +923,15 @@
             }
         }
 
-        /* Kelas untuk animasi masuk */
         .modal.show {
             display: block;
             animation: modalFadeIn 0.3s ease-out;
         }
 
-        /* Kelas untuk animasi keluar */
         .modal.hide {
             animation: modalFadeOut 0.3s ease-in;
         }
 
-        /* Staggered animation untuk event card */
         .event-card {
             opacity: 0;
             transform: translateY(20px);
@@ -946,7 +945,7 @@
             }
         }
     </style>
-<base target="_blank">
+    <base target="_blank">
 </head>
 <body>
 
@@ -1121,38 +1120,30 @@
     </div>
 
     <script>
+        // ==================== KONFIGURASI SUPAABASE ====================
+        // GANTI DENGAN URL DAN KEY ANDA DARI SUPAABASE
+        const SUPABASE_CONFIG = {
+            url: 'https://zrkugfzulshbtoqlhqaj.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpya3VnZnp1bHNoYnRvcWxocWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NDc0MzcsImV4cCI6MjA4MDIyMzQzN30.wk4WPpjbkdInpVM8BN7rnKGnMZUHYElVGDhi8d_GzG0'
+        };
+
+        // Inisialisasi Supabase
+        const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
         const TICKETS_DATA = [
             {
                 id: 1,
                 title: "Cara Meminum Ramune",
-                image: "", 
+                image: "",
                 date: "Kamis, 27 Nov 2025",
                 time: "19:00 WIB",
                 members: "-",
                 price: 12000
             },
-            {
-                id: 2,
-                title: "Aitakatta",
-                image: "", 
-                date: "Jumat, 28 Nov 2025",
-                time: "20:00 WIB",
-                members: "-",
-                price: 15000
-            },
-            {
-                id: 3,
-                title: "Kira-Kira Girls",
-                image: "", 
-                date: "Sabtu, 29 Nov 2025",
-                time: "16:00 WIB",
-                members: "-",
-                price: 10000
-            },
         ];
 
         const CONFIG = {
-            adminWhatsapp: '62857311528573', 
+            adminWhatsapp: '62857311528573',
         };
 
         let currentEvent = '';
@@ -1161,9 +1152,79 @@
         let currentTime = '';
         let currentOrderId = '';
 
+        // ==================== FUNGSI DATABASE ====================
+
+        // Fungsi untuk mengecek username di database
+        async function checkUsername(username) {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username.toLowerCase().trim())
+                    .single();
+
+                if (error && error.code !== 'PGRST116') {
+                    console.error('Error checking username:', error);
+                    return null;
+                }
+
+                return data;
+            } catch (error) {
+                console.error('Exception in checkUsername:', error);
+                return null;
+            }
+        }
+
+        // Fungsi untuk membuat user baru
+        async function createNewUser(username) {
+            try {
+                const newUser = {
+                    username: username.toLowerCase().trim(),
+                    created_at: new Date().toISOString(),
+                    subscription_status: 'active'
+                };
+
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([newUser])
+                    .select()
+                    .single();
+
+                if (error) {
+                    console.error('Error creating user:', error);
+                    return { success: false, error: error.message };
+                }
+
+                // Update last login
+                await supabase
+                    .from('users')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', data.id);
+
+                return { success: true, data };
+            } catch (error) {
+                console.error('Exception in createNewUser:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Fungsi untuk update last login
+        async function updateLastLogin(username) {
+            try {
+                await supabase
+                    .from('users')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('username', username.toLowerCase().trim());
+            } catch (error) {
+                console.error('Error updating last login:', error);
+            }
+        }
+
+        // ==================== FUNGSI UTAMA ====================
+
         function renderTickets() {
             const eventsGrid = document.getElementById('eventsGrid');
-            eventsGrid.innerHTML = ''; 
+            eventsGrid.innerHTML = '';
             
             TICKETS_DATA.forEach((ticket, index) => {
                 const eventCard = document.createElement('div');
@@ -1277,10 +1338,11 @@
         }
 
         window.showComingSoon = function () {
+            alert('Fitur ini akan segera hadir!');
         };
 
         window.selectManualPayment = function () {
-            currentOrderId = generateOrderId(); 
+            currentOrderId = generateOrderId();
             
             const manualAmount = document.getElementById('manualAmount');
             const manualOrderId = document.getElementById('manualOrderId');
@@ -1290,14 +1352,14 @@
             const manualPrice = document.getElementById('manualPrice');
             
             manualAmount.textContent = formatCurrency(currentPrice);
-            manualOrderId.textContent = currentOrderId; 
+            manualOrderId.textContent = currentOrderId;
             manualShow.textContent = currentEvent;
             manualDate.textContent = currentDate;
             manualTime.textContent = currentTime;
             manualPrice.textContent = formatCurrency(currentPrice);
             
-            showContainer('manualPaymentContainer'); 
-            setupWhatsappOrder(); 
+            showContainer('manualPaymentContainer');
+            setupWhatsappOrder();
         };
 
         function setupWhatsappOrder() {
@@ -1319,13 +1381,15 @@
         window.goBackToLogin = function() { showContainer('loginContainer'); };
         window.goBackToPaymentMethod = function() { showContainer('paymentMethodContainer'); };
 
+        // ==================== EVENT LISTENERS ====================
+
         document.addEventListener('DOMContentLoaded', function() {
             const loginContainer = document.getElementById('loginContainer');
             const scheduleModal = document.getElementById('scheduleModal');
 
             const usernameInput = document.getElementById('username');
             const usernameGroup = document.getElementById('usernameGroup');
-            const enterButton = document.querySelector('.btn-enter'); 
+            const enterButton = document.querySelector('.btn-enter');
             const showScheduleBtn = document.getElementById('showSchedule');
             const closeModal = document.getElementById('closeModal');
             const backToHomeBtn = document.getElementById('backToHome');
@@ -1333,13 +1397,15 @@
 
             const newUsername = document.getElementById('newUsername');
             const newUsernameGroup = document.getElementById('newUsernameGroup');
-            const createUser = document.getElementById('createUser');
+            const createUserBtn = document.getElementById('createUser');
 
             setupInputAnimation(usernameInput, usernameGroup);
             setupInputAnimation(newUsername, newUsernameGroup);
 
-            enterButton.addEventListener('click', function() {
+            // Event Login
+            enterButton.addEventListener('click', async function() {
                 const username = usernameInput.value.trim();
+                
                 if (!username) {
                     usernameInput.focus();
                     usernameGroup.style.animation = 'shake 0.4s ease-in-out';
@@ -1347,23 +1413,137 @@
                     return;
                 }
 
-                const users = JSON.parse(localStorage.getItem('stream48_users') || '{}');
-                if (users[username]) {
-                    enterButton.style.background = 'linear-gradient(135deg, var(--accent-success) 0%, #059669 100%)';
-                    enterButton.textContent = 'BERHASIL!';
-                    localStorage.setItem('stream48_isLoggedIn', 'true');
-                    localStorage.setItem('stream48_username', username);
-                    localStorage.setItem('stream48_userData', JSON.stringify(users[username]));
-                    setTimeout(() => window.location.href = 'user-dashboard.html', 800);
-                } else {
+                // Tampilkan loading
+                enterButton.style.background = 'linear-gradient(135deg, var(--accent-warning) 0%, #d97706 100%)';
+                enterButton.textContent = 'MEMERIKSA...';
+                enterButton.disabled = true;
+
+                try {
+                    const user = await checkUsername(username);
+                    
+                    if (user) {
+                        // Login berhasil
+                        enterButton.style.background = 'linear-gradient(135deg, var(--accent-success) 0%, #059669 100%)';
+                        enterButton.textContent = 'BERHASIL!';
+                        
+                        // Update last login
+                        await updateLastLogin(username);
+                        
+                        // Simpan ke localStorage
+                        localStorage.setItem('stream48_isLoggedIn', 'true');
+                        localStorage.setItem('stream48_username', username);
+                        localStorage.setItem('stream48_userData', JSON.stringify({
+                            id: user.id,
+                            username: user.username,
+                            createdAt: user.created_at,
+                            subscriptionStatus: user.subscription_status
+                        }));
+                        
+                        setTimeout(() => {
+                            window.location.href = 'user-dashboard.html';
+                        }, 800);
+                    } else {
+                        // Username tidak ditemukan
+                        enterButton.style.background = 'linear-gradient(135deg, var(--accent-danger) 0%, #dc2626 100%)';
+                        enterButton.textContent = 'USERNAME TIDAK DITEMUKAN!';
+                        
+                        setTimeout(() => {
+                            enterButton.style.background = 'linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%)';
+                            enterButton.textContent = 'MASUK SEKARANG';
+                            enterButton.disabled = false;
+                        }, 1500);
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
                     enterButton.style.background = 'linear-gradient(135deg, var(--accent-danger) 0%, #dc2626 100%)';
-                    enterButton.textContent = 'USERNAME TIDAK DITEMUKAN!';
+                    enterButton.textContent = 'ERROR! COBA LAGI';
+                    
                     setTimeout(() => {
                         enterButton.style.background = 'linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%)';
                         enterButton.textContent = 'MASUK SEKARANG';
+                        enterButton.disabled = false;
                     }, 1500);
                 }
             });
+
+            // Event Buat User Baru
+            if (createUserBtn) {
+                createUserBtn.addEventListener('click', async function() {
+                    const username = newUsername.value.trim();
+                    
+                    if (!username) {
+                        newUsername.focus();
+                        return;
+                    }
+
+                    // Validasi username
+                    if (username.length < 3) {
+                        alert('Username minimal 3 karakter');
+                        return;
+                    }
+
+                    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                        alert('Username hanya boleh mengandung huruf, angka, dan underscore');
+                        return;
+                    }
+
+                    // Tampilkan loading
+                    createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-warning) 0%, #d97706 100%)';
+                    createUserBtn.textContent = 'MEMBUAT...';
+                    createUserBtn.disabled = true;
+
+                    try {
+                        // Cek apakah username sudah ada
+                        const existingUser = await checkUsername(username);
+                        
+                        if (existingUser) {
+                            createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-danger) 0%, #dc2626 100%)';
+                            createUserBtn.textContent = 'USERNAME SUDAH ADA!';
+                            
+                            setTimeout(() => {
+                                createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%)';
+                                createUserBtn.textContent = 'BUAT USERNAME';
+                                createUserBtn.disabled = false;
+                            }, 1500);
+                            return;
+                        }
+
+                        // Buat user baru
+                        const result = await createNewUser(username);
+                        
+                        if (result.success) {
+                            createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-success) 0%, #059669 100%)';
+                            createUserBtn.textContent = 'BERHASIL DIBUAT!';
+                            
+                            // Simpan ke localStorage
+                            localStorage.setItem('stream48_isLoggedIn', 'true');
+                            localStorage.setItem('stream48_username', username);
+                            localStorage.setItem('stream48_userData', JSON.stringify({
+                                id: result.data.id,
+                                username: result.data.username,
+                                createdAt: result.data.created_at,
+                                subscriptionStatus: result.data.subscription_status
+                            }));
+                            
+                            setTimeout(() => {
+                                window.location.href = 'user-dashboard.html';
+                            }, 800);
+                        } else {
+                            throw new Error(result.error);
+                        }
+                    } catch (error) {
+                        console.error('Create user error:', error);
+                        createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-danger) 0%, #dc2626 100%)';
+                        createUserBtn.textContent = 'GAGAL MEMBUAT!';
+                        
+                        setTimeout(() => {
+                            createUserBtn.style.background = 'linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%)';
+                            createUserBtn.textContent = 'BUAT USERNAME';
+                            createUserBtn.disabled = false;
+                        }, 1500);
+                    }
+                });
+            }
 
             helpAccessBtn.addEventListener('click', function() {
                 const defaultMessage = 'Silahkan Hubungi.';
@@ -1410,6 +1590,7 @@
 
             setTimeout(() => usernameInput.focus(), 800);
 
+            // Buat partikel background
             const particlesContainer = document.getElementById('particles');
             for (let i = 0; i < 12; i++) {
                 const particle = document.createElement('div');
@@ -1431,5 +1612,4 @@
     </script>
 
 </body>
-
 </html>
