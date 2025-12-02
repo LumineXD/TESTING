@@ -1121,14 +1121,16 @@
 
     <script>
         // ==================== KONFIGURASI SUPAABASE ====================
-        // GANTI DENGAN URL DAN KEY ANDA DARI SUPAABASE
         const SUPABASE_CONFIG = {
-            url: 'https://gqvbycdsygngvyyjowjk.supabase.co',
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxdmJ5Y2RzeWduZ3Z5eWpvd2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NjMwOTUsImV4cCI6MjA4MDIzOTA5NX0.2-RgTv1A3FTekEZ05gMytHc4IqIyttLsveCZxcAQ8v4'
+            url: 'https://jbssdhygenodqbzpfgdy.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impic3NkaHlnZW5vZHFienBmZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NjY3NjcsImV4cCI6MjA4MDI0Mjc2N30.iBvb7HHyJShYOcDYAv51Loy9AjXD9zmjN2ILK0iPBFg'
         };
 
         // Inisialisasi Supabase
         const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        
+        // Debug: Cek apakah Supabase terinisialisasi
+        console.log('Supabase client initialized:', supabase ? 'Yes' : 'No');
 
         const TICKETS_DATA = [
             {
@@ -1157,18 +1159,27 @@
         // Fungsi untuk mengecek username di database
         async function checkUsername(username) {
             try {
+                console.log('Checking username:', username);
+                
                 const { data, error } = await supabase
                     .from('users')
-                    .select('*')
+                    .select('username, created_at, last_login')
                     .eq('username', username.toLowerCase().trim())
                     .single();
 
-                if (error && error.code !== 'PGRST116') {
-                    console.error('Error checking username:', error);
+                // Jika tidak ditemukan, error code akan 'PGRST116'
+                if (error && error.code === 'PGRST116') {
+                    console.log('Username not found');
+                    return null; // User tidak ditemukan
+                }
+                
+                if (error) {
+                    console.error('Supabase error:', error);
                     return null;
                 }
 
-                return data;
+                console.log('Username found:', data);
+                return data; // User ditemukan
             } catch (error) {
                 console.error('Exception in checkUsername:', error);
                 return null;
@@ -1178,16 +1189,18 @@
         // Fungsi untuk membuat user baru
         async function createNewUser(username) {
             try {
+                console.log('Creating new user:', username);
+                
                 const newUser = {
                     username: username.toLowerCase().trim(),
                     created_at: new Date().toISOString(),
-                    subscription_status: 'active'
+                    last_login: new Date().toISOString()
                 };
 
                 const { data, error } = await supabase
                     .from('users')
                     .insert([newUser])
-                    .select()
+                    .select('username, created_at, last_login')
                     .single();
 
                 if (error) {
@@ -1195,12 +1208,7 @@
                     return { success: false, error: error.message };
                 }
 
-                // Update last login
-                await supabase
-                    .from('users')
-                    .update({ last_login: new Date().toISOString() })
-                    .eq('id', data.id);
-
+                console.log('User created successfully:', data);
                 return { success: true, data };
             } catch (error) {
                 console.error('Exception in createNewUser:', error);
@@ -1211,12 +1219,22 @@
         // Fungsi untuk update last login
         async function updateLastLogin(username) {
             try {
-                await supabase
+                console.log('Updating last login for:', username);
+                
+                const { error } = await supabase
                     .from('users')
-                    .update({ last_login: new Date().toISOString() })
+                    .update({ 
+                        last_login: new Date().toISOString()
+                    })
                     .eq('username', username.toLowerCase().trim());
+
+                if (error) {
+                    console.error('Error updating last login:', error);
+                } else {
+                    console.log('Last login updated successfully');
+                }
             } catch (error) {
-                console.error('Error updating last login:', error);
+                console.error('Error in updateLastLogin:', error);
             }
         }
 
@@ -1383,6 +1401,8 @@
         // ==================== EVENT LISTENERS ====================
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+            
             const loginContainer = document.getElementById('loginContainer');
             const scheduleModal = document.getElementById('scheduleModal');
 
@@ -1432,10 +1452,9 @@
                         localStorage.setItem('stream48_isLoggedIn', 'true');
                         localStorage.setItem('stream48_username', username);
                         localStorage.setItem('stream48_userData', JSON.stringify({
-                            id: user.id,
                             username: user.username,
                             createdAt: user.created_at,
-                            subscriptionStatus: user.subscription_status
+                            lastLogin: user.last_login
                         }));
                         
                         setTimeout(() => {
@@ -1472,6 +1491,8 @@
                     
                     if (!username) {
                         newUsername.focus();
+                        newUsernameGroup.style.animation = 'shake 0.4s ease-in-out';
+                        setTimeout(() => newUsernameGroup.style.animation = '', 400);
                         return;
                     }
 
@@ -1516,10 +1537,9 @@
                             localStorage.setItem('stream48_isLoggedIn', 'true');
                             localStorage.setItem('stream48_username', username);
                             localStorage.setItem('stream48_userData', JSON.stringify({
-                                id: result.data.id,
                                 username: result.data.username,
                                 createdAt: result.data.created_at,
-                                subscriptionStatus: result.data.subscription_status
+                                lastLogin: result.data.last_login
                             }));
                             
                             setTimeout(() => {
@@ -1604,6 +1624,15 @@
                 particle.style.animationDelay = `${delay}s`;
                 particle.style.animationDuration = `${duration}s`;
                 particlesContainer.appendChild(particle);
+            }
+            
+            // Cek apakah user sudah login sebelumnya
+            const isLoggedIn = localStorage.getItem('stream48_isLoggedIn');
+            const savedUsername = localStorage.getItem('stream48_username');
+            
+            if (isLoggedIn === 'true' && savedUsername) {
+                usernameInput.value = savedUsername;
+                usernameGroup.classList.add('has-value');
             }
         });
     </script>
