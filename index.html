@@ -1123,8 +1123,8 @@
         // ==================== KONFIGURASI SUPAABASE ====================
         // GANTI DENGAN URL DAN KEY ANDA DARI SUPAABASE
         const SUPABASE_CONFIG = {
-            url: 'https://zrkugfzulshbtoqlhqaj.supabase.co',
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpya3VnZnp1bHNoYnRvcWxocWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NDc0MzcsImV4cCI6MjA4MDIyMzQzN30.wk4WPpjbkdInpVM8BN7rnKGnMZUHYElVGDhi8d_GzG0'
+            url: 'https://gqvbycdsygngvyyjowjk.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxdmJ5Y2RzeWduZ3Z5eWpvd2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ2NjMwOTUsImV4cCI6MjA4MDIzOTA5NX0.2-RgTv1A3FTekEZ05gMytHc4IqIyttLsveCZxcAQ8v4'
         };
 
         // Inisialisasi Supabase
@@ -1338,7 +1338,6 @@
         }
 
         window.showComingSoon = function () {
-            alert('Fitur ini akan segera hadir!');
         };
 
         window.selectManualPayment = function () {
@@ -1478,12 +1477,10 @@
 
                     // Validasi username
                     if (username.length < 3) {
-                        alert('Username minimal 3 karakter');
                         return;
                     }
 
                     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                        alert('Username hanya boleh mengandung huruf, angka, dan underscore');
                         return;
                     }
 
